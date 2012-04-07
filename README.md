@@ -7,10 +7,15 @@ request data from a server in a different domain. CORS can be used as a modern a
 Syntax:
 
          new Jsonp(url, callback).fetch() 
+         OR
+         new jsonp.fetch(url, callback)
+         OR
+         JSONP.get(url, params, callback)  
 
 How to use:
 -----------
 
+         #Example-1
          var username = 'yelf',
 
          endpoint = 'http://query.yahooapis.com/v1/public/yql?q=',
@@ -26,6 +31,7 @@ How to use:
     
          new Jsonp(url,callback).fetch();
 
+         #Example-2
          var tpl = "<li><a href='http://twitter.com/{from_user}'>{from_user}</a> {text}<span>{created_at}</span></li>",
 
          urltwitter = 'http://search.twitter.com/search.json?q=mootools&rpp=5&callback=?';
@@ -46,6 +52,14 @@ How to use:
 
          }).fetch();
 
+  
+         #example-3
+         var url = 'http://search.twitter.com/search.json';
 
+         JSONP.get(url, {q: 'mootools', rpp: 10}, function(data){
 
+                  //do stuff with data
+         })
+  
 
+**Happy Requesting!**
