@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+   <title>Last.fm & Twitter Badge based on YQL & JSONP</title>
+   <link rel="stylesheet" type="text/css" href="lastfm.css" />
+   <style type="text/css">
+ h1,h2,h3,body { font-family:'gill sans','dejavu sans',verdana,sans-serif; }
+   h1 {
+      font-weight:bold;
+      font-size:32px;
+      letter-spacing: 2px;
+      color:#000;
+      margin-bottom:0;
+      position:relative;    
+    }
+    h1 b {
+      color:#ccc;
+      font-size: 40px
+    }
+.lastFM
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 90%;
+	margin: 2em 3em;
+	width: 280px;
+	color: #666;
+}
+.lastFM a
+{
+	color: #444;
+	text-decoration: none;
+}
+.lastFM a:hover
+{
+	color: #000;
+	text-decoration: underline;
+}
+.lastFM a img { border: none; }
+.lastFM img
+{
+	float: left;
+	margin: 0 1em 0 0;
+}
+
+.lastFMHeader
+{
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 0.2em 0;
+}
+
+
+
+.lastFMBody { border: 1px solid #94C9FF;}
+.lastFMBody ul
+{
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.lastFM .itemRow
+{
+	clear: left;
+	margin: 0;
+	padding: 0.4em; 
+	height: 64px;
+}
+.lastFM .itemName a
+{
+	font-weight: bold;
+}
+
+.lastFM .odd { background-color: #94C9FF; }
+.lastFM .even { background-color: #A1D9FF; }
+
+.lastFM a img { border: none; }
+.lastFM img {
+	float: left;
+	margin: 0 1em 0 0;
+}
+
+.lastFM .time {
+font-style: oblique;
+font-size: 11px;
+font-height: bold
+}
+
+.lastFM ul li a img {width: 64px; height: 64px}
+   </style> 
+</head>
+<body>
+<h1><b>|</b>Last.fm & Twitter Badge based on YQL & JSONP</h1>
+<script type="text/javascript">!function(win){var template = function(tmp,o){ return tmp.replace((RegExp("{([^{}]*)}","gi")), function(tag,p){return o[p];});};win['template'] = template;}(this);</script>
+<script type="text/javascript" src="jsonp.js"></script>
+<script type="text/javascript">
+
+         var tpl = "<li><a href='http://twitter.com/{from_user}'>{from_user}</a> {text}<span>{created_at}</span></li>",
+
+         username = 'yelf',
+
+         endpoint = 'http://query.yahooapis.com/v1/public/yql?q=',
+
+         yql = 'use "http://thinkphp.ro/apps/lastfm/YQL-open-data-table/recentlastfm.xml" as lastfm;select * from lastfm where username="'+ username +'" and api_key="2993c6e15c91a2890c2f11fa95673067"',
+
+         url = endpoint + encodeURIComponent(yql) + '&format=json&callback=?'
+ 
+         function callback(data) {
+
+                  document.getElementById('result').innerHTML = data.query.results.result;
+         } 
+    
+         jsonp.fetch(url,callback);
+
+         var urltwitter = 'http://search.twitter.com/search.json?q=mootools&rpp=5&callback=?'
+
+         jsonp.fetch(urltwitter, function(data){
+
+               var result = data.results, 
+
+               out = '<ul>'
+                
+               for(var i in result) {
+
+                   out += template(tpl,result[i])
+               } 
+               out += '</ul>'
+
+              document.getElementById('result-twitter').innerHTML = out 
+         })
+</script>
+
+<div class="lastFM">
+<div class="lastFMHeader">Recent Tracks</div>
+<div id="result" class="lastFMBody recenttracks">Loading...</div>
+</div>
+
+<div class="twitter">
+<div class="twitterHEAD">Search Twitter</div>
+<div id="result-twitter" class="twitterBODY">Loading...</div>
+</div>
+
+<div id="ft"><p>Created by <a href="http://thinkphp.ro/+">google+</a>| using <a href="http://thinkphp.ro/apps/lastfm/YQL-open-data-table/recentlastfm.xml">Open Data Table</a></p></div>
+</body>
+</html>
