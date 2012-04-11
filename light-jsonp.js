@@ -49,10 +49,11 @@ var JSONP = (function(){
    /*private method*/
    function loadScript(url) {
 
-            var s = document.createElement('script');
-                s.src = url,
-                s.async = true,
-                done = false;
+            var s = document.createElement('script'),
+                done = false
+
+                s.src = url
+                s.async = true
 
                 s.onload = s.onreadystatechange = function() {
 
