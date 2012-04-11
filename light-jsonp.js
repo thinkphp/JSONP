@@ -5,11 +5,18 @@ var JSONP = (function(){
        query,
        key,
        head,
+       callbackName = 'callback', 
        context = this;
+
+   /*private method for optional setting callback name */
+   function init(obj) {
+
+       callbackName = obj.callbackName  
+   } 
 
    /*private method that becomes public method through return object*/ 
    function jsonp(url, params, callback) {
- 
+
         query = '?';
         params = params || {}
 
@@ -31,10 +38,10 @@ var JSONP = (function(){
                context[ fnHandler ] = null
         }
 
-        url = url + query + "callback=" + fnHandler
+        url = url + query + callbackName + "=" + fnHandler
 
         //for debug url
-        //console.log(url)
+        console.log(url)
 
         loadScript(url);    
    }
@@ -72,5 +79,5 @@ var JSONP = (function(){
                 head.appendChild(s)
    }
   
-   return {get: jsonp}; 
+   return {init: init, get: jsonp}; 
 })()
