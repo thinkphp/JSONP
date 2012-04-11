@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+   <title>JSONP</title>
+   <link rel="stylesheet" type="text/css" href="lastfm.css" />
+   <style type="text/css">
+ h1,h2,h3,body { font-family:'gill sans','dejavu sans',verdana,sans-serif; }
+   h1 {
+      font-weight:bold;
+      font-size:30px;
+      letter-spacing: 1px;
+      color:#000;
+      margin-bottom:0;
+      position:relative;    
+    }
+    h1 b {
+      color:#ccc;
+      font-size: 40px
+    }
+
+    ul{width: 400px;}
+    ul li{display: inline;}
+    h1{font-size: 30px;margin: 10px}
+   </style> 
+</head>
+<body>
+<h1><b>|</b>Get Flickr Photos using JSONP</h1>
+<script type="text/javascript">!function(win){var template = function(tmp,o){ return tmp.replace((RegExp("{([^{}]*)}","gi")), function(tag,p){return o[p];});};win['template'] = template;}(this);</script>
+<script type="text/javascript" src="light-jsonp-min.js"></script>
+<script type="text/javascript">
+
+         var $ = function(id) {return document.getElementById(id);},
+            tpl = "<li><a href='http://www.flickr.com/photos/{owner}/{id}' target='_blank'><img src='http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg' alt='{title}' width='75' height='75'/></a></li>",
+            url = 'http://api.flickr.com/services/rest/';
+
+         //set callback name
+         JSONP.init({callbackName: 'jsoncallback'})
+
+         JSONP.get(url, 
+
+                  {api_key: 'e407090ddb7d7c7c36e0a0474289ec74',
+                   per_page: 20, 
+                   page: 1, 
+                   text: 'beach kudos', 
+                   has_geo: true, 
+                   method: 'flickr.photos.search', 
+                   format: 'json'},
+
+                   function(data) {
+                      if(console.log) {console.log(data);}
+                      var photos = data.photos.photo,
+                          n = photos.length;
+
+                      var out = '<ul>';
+
+                      for(var i=0; i<n; i++) {
+
+                          out += template(tpl,photos[i])
+                      }  
+
+                      out += '</ul>';
+                      $('container').innerHTML = out;  
+                   })          
+
+</script>
+<div class="flickr">
+</div>
+<div id="container"></div>
+<div id="ft"><p>Created by <a href="http://thinkphp.ro/+">google+</a></p></div>
+</body>
+</html>
