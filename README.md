@@ -5,14 +5,22 @@ JSONP or JSON with padding is a complement to the base JavaScript Object Notatio
 request data from a server in a different domain. CORS can be used as a modern alternative to the JSONP pattern.
 
 Syntax:
-         new Jsonp(url, callback).fetch() 
+
+      new Jsonp(url, callback).fetch() 
+
          OR
-         new jsonp.fetch(url, callback)
+
+      new jsonp.fetch(url, callback)
+
          OR
-         JSONP.get(url, params, callback)  
+
+      JSONP.get(url, params, callback)  
+
          OR
-         JSONP.init({callbackName: 'jsoncallback'}) 
-         JSONP.get(url, params, callback);
+
+      JSONP.init({callbackName: 'jsoncallback'}) 
+
+      JSONP.get(url, params, callback);
 
 How to use:
 -----------
@@ -95,6 +103,33 @@ How to use:
                    per_page: 20, 
                    page: 1, 
                    text: 'beach kudos', 
+                   has_geo: true, 
+                   method: 'flickr.photos.search', 
+                   format: 'json'},
+
+                   function(data) {
+
+                      var photos = data.photos.photo,
+                          n = photos.length,
+                          out = '<ul>';
+
+                      for(var i=0; i<n; i++) {
+
+                          out += template(tpl,photos[i])
+                      }  
+
+                      out += '</ul>';
+
+                      $('container').innerHTML = out;  
+                   })          
+
+        //we can make multiple requests
+        JSONP.get(url, 
+
+                  {api_key: 'e407090ddb7d7c7c36e0a0474289ec74',
+                   per_page: 20, 
+                   page: 1, 
+                   text: 'san francisco', 
                    has_geo: true, 
                    method: 'flickr.photos.search', 
                    format: 'json'},
