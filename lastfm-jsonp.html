@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+   <title>Plugin last.fm based on JSONP</title>
+   <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css"/>
+   <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/base/base.css" type="text/css"/>
+   <style type="text/css">
+ html,body{font-family: georgia,helvetica,arial,sans-serif;}
+   h1{color: #000000;
+    font-size: 54px;
+    font-weight: bold;
+    left: -50px;
+    letter-spacing: -5px;
+    margin-bottom: 0;
+    position: relative;}
+   h1 span{color: #111}
+   .error{color: #fff;background: #c00;padding: 4px;width: 150px}
+pre {
+    clear: both;
+    color: #666666;
+    margin-left: -1px;
+}
+code {
+    font-size: 2.3em;
+}
+ pre,code, h1 {
+    font-family: menlo,'dejavu sans mono',monospace;
+}
+h4 {
+    clear: both;
+    color: #111111;
+    font-size: 30px;
+    margin-bottom: 0;
+}
+
+.lastfm *{
+  margin:0;
+  padding:0;
+  font-size:90%;
+  list-style:none;
+  line-height:1.3em;
+}
+.lastfm {
+  border:1px solid #001C00;
+  border-radius: 10px 10px 10px 10px;
+  width:300px;
+  padding:.5em;
+  margin:.5em;
+  background: #001C00;
+  font-family:arial,sans-serif; 
+  clear: both;
+  }
+
+.lastfm li{
+  border-bottom:1px solid #3773DB;
+  border-radius: 10px 10px 10px 10px;
+  padding-bottom:.2em;
+  margin-bottom:.2em;
+  background: #339966;
+  padding: 3px  
+}
+.lastfm li a{
+  font-size: 14px
+}
+.lastfm a{
+  color: #fff;
+  text-decoration: none;
+}
+.lastfm li div{
+  color: #ddd;
+  font-size: 10px;  
+}
+.lastfm a:hover{
+ text-decoration: underline;
+}
+   #ft{font-size:80%;color:#888;text-align:left;margin:2em 0;font-size: 12px}
+   #ft p a{color:#93C37D;}
+   </style>
+   <script type="text/javascript">!function(win){var template = function(tmp,o){ return tmp.replace((RegExp("{([^{}]*)}","gi")), function(tag,p){return o[p];});};win['template'] = template;}(this);</script>
+   <script type="text/javascript" src="light-jsonp-min.js"></script>
+   <script type="text/javascript>
+</script>
+
+<script type="text/javascript">
+Function.prototype.bind = function(object) {
+
+            var method = this;
+
+            return function() {
+
+                   return method.apply(object,arguments);
+            };
+};
+</script>
+</head>
+<body>
+
+<body class="yui-skin-sam">
+<div id="doc" class="yui-t7">
+   <div id="hd" role="banner"><h1>Last.fm Badge using JSONP</h1></div>
+   <div id="bd" role="main">
+	<div class="yui-g">
+       <div class="yui-u first">
+            <div id="yelf"></div> 
+       </div>
+       <div class="yui-u">
+            <div id="voidberg"></div> 
+       </div>
+
+<script type="text/javascript">
+
+var EventManager = function(){
+    this._listeners = {};
+};
+EventManager.prototype.addListener = function(event,listener){
+    if(typeof this._listeners[event] == 'undefined') {
+       this._listeners[event] = [];  
+    }
+    this._listeners[event].push(listener);
+};
+EventManager.prototype.removeListener = function(event){
+
+     if(this._listeners[event] instanceof Array) {
+           var listeners = this._listeners[event],
+               n = listeners.length;
+               for(var i=0;i<n;i++) {
+                   if(listeners[i] == event) {
+                       listeners.splice(i,1);
+                       break;  
+                   } 
+               }  
+     } 
+};
+EventManager.prototype.fireEvent = function(){
+
+     if(typeof arguments[0] == 'string') {
+        event = {type: arguments[0],args: arguments}; 
+     }  
+     if(!event.type) {
+        throw new Error("Missing Event");
+     }
+
+     if(this._listeners[event.type] instanceof Array) {
+        var listeners = this._listeners[event.type],
+            n = listeners.length;
+            for(var i=0;i<n;i++) {
+                listeners[i].call(this,event.args);
+            }    
+     }
+};
+
+var $ = function(id){return document.getElementById(id);}
+
+function LastFM(options) {
+
+    //public data members
+
+    this.username = 'thinkphp';
+
+    this.outputid = null;
+
+    this.badgeid = 'badge';
+
+    this.badgeclass = 'lastfm';
+
+    this.amount = 10;
+
+    //fire events request
+    req = function(){};
+
+    //fire events complete||success
+    success = function(){};
+
+    //template output
+    this.tpl = "<li><a href='{link}'>{title}</a> <div>{pubDate}</div></li>";
+
+    //object for EventManager
+    this.evt = new EventManager();
+
+        if(typeof options == 'object') {
+
+               if(typeof options.onRequest === 'function') {
+                      req = options.onRequest;  
+               } 
+               if(typeof options.onSuccess === 'function') {
+                      success = options.onSuccess;  
+               } 
+
+               if(typeof options.username !== 'undefined') {
+                      this.username = options.username; 
+               }
+
+               if(typeof options.where !== 'undefined') {
+                      this.outputid = options.where; 
+               }
+
+               this.badgeid = this.badgeid + (new Date().getTime());
+
+               //add custom event onRequest
+               this.evt.addListener('request', req);
+
+               //add custom event onComplete
+               this.evt.addListener('complete', success);
+
+               this.callData();
+
+        }//endif
+};
+
+
+ 
+LastFM.prototype.callData = function() {
+
+         if($(this.outputid)) {
+
+             var self = this;
+
+             this.evt.fireEvent('request');
+
+             var user = this.username;
+
+             window.seed = this.retrieveData.bind(this);
+
+             var endpoint = "http://query.yahooapis.com/v1/public/yql"
+
+             var yql = "select * from rss where url='http://ws.audioscrobbler.com/1.0/user/" + user + "/recenttracks.rss'";
+            
+             JSONP.get(endpoint, {q: yql, format: 'json'}, function(data){
+
+                   this.retrieveData(data);
+
+             }.bind(this));
+         }
+};
+
+
+    LastFM.prototype.retrieveData = function(dataset) {
+
+             if(dataset.query.results !== null) {
+
+                this.displayData(dataset);
+
+             } else {
+
+                this.handleError();
+             }
+    };
+
+    LastFM.prototype.displayData = function(dataset) {
+
+         this.evt.fireEvent('complete',[dataset]);
+
+         var out = $(this.outputid);
+
+         var items = dataset.query.results.item, 
+             n = items.length, 
+             output = '',
+             ul = document.createElement('ul');
+
+             ul.id = this.badgeid;
+             ul.className = this.badgeclass; 
+
+             for(var i=0;i<n;i++) {
+                 output += template(this.tpl,items[i]);  
+             }
+
+             ul.innerHTML = output;
+
+             out.appendChild(ul);
+
+             $(this.outputid).getElementsByTagName("a")[0].focus();
+    };
+ 
+    LastFM.prototype.handleError = function() {
+
+             $(this.outputid).innerHTML = '<div class="error">User Not Found.</div>' 
+    };
+
+    //Look Lastfm Badge in action:
+
+         new LastFM({username: 'yelf',
+                     where: 'yelf',
+
+                     onRequest: function(data){
+
+                                $('yelf').innerHTML = "<span class='loading'>Loading...</span>";
+                     },
+
+                     onSuccess: function(data){
+
+                                $('yelf').innerHTML = "";
+                     }
+         });
+
+
+         new LastFM({username: 'voidberg', 
+
+                     where: 'voidberg',
+
+                     onRequest: function(data){
+
+                                $('voidberg').innerHTML = "<span class='loading'>Loading...</span>";
+                     },
+
+                     onSuccess: function(data){
+
+                                $('voidberg').innerHTML = "";
+                     }
+         });
+
+   </script>
+ </div>
+</div>
+<div id="ft"><p>Created by @<a href="http://twitter.com/thinkphp">thinkphp</a> using <a href="light-jsonp.js">JSONP</a> | download <a href="https://github.com/thinkphp/JSONP">GitHub</a></p></div>
+</div>
+</body>
+</html>
